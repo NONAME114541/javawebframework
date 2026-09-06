@@ -79,3 +79,45 @@ GET http://localhost:8080/order/999
 
 ### 12.4 按菜名查订单：谁点过回锅肉（JPQL 联表）
 GET http://localhost:8080/order/search?dish=回锅肉
+
+##############################################
+# 第13课 · 菜品拍照上架（multipart 上传）
+##############################################
+
+### 13.1 上架回锅肉照片（multipart：boundary 分界线 + < 引用本地文件；课前把测试图放项目根目录）
+POST http://localhost:8080/menu/1/image
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="dish.png"
+Content-Type: image/png
+
+< ./dish.png
+--WebAppBoundary--
+
+### 13.2 上传非图片文件（预期 code=40403）
+POST http://localhost:8080/menu/1/image
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="fake.txt"
+Content-Type: text/plain
+
+< ./fake.txt
+--WebAppBoundary--
+
+##############################################
+# 第14课 · 照片上墙（把 13.1 返回的 uuid 文件名填入 <uuid.png>）
+##############################################
+
+### 14.1 照片直出（预期 200 image/png；第13课钩子兑现）
+GET http://localhost:8080/files/<uuid.png>
+
+### 14.2 下载照片（预期 200 + Content-Disposition: attachment）
+GET http://localhost:8080/download/<uuid.png>
+
+### 14.3 下载不存在的文件（预期 code=40405）
+GET http://localhost:8080/download/nope.png
+
+### 14.4 路径穿越攻击演练（预期被 Tomcat 拦下：400）
+GET http://localhost:8080/download/..%2Fpom.xml
