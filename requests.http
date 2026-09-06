@@ -16,10 +16,10 @@ GET http://localhost:8080/nobody-home
 # 第2课 · 服务员接第一单
 ##############################################
 
-### 2.1 查菜单（预期 6 道菜）
+### 2.1 查菜单（第8课起：价格两位小数 18.00，来自 t_menu）
 GET http://localhost:8080/menu
 
-### 2.2 正常点单：回锅肉x2 + 米饭x2（预期 totalMoney=38）
+### 2.2 正常点单：回锅肉x2 + 米饭x2（第9课起带订单号；第10课起 data 有 orderId；totalMoney=38.00）
 POST http://localhost:8080/order
 Content-Type: application/json
 
