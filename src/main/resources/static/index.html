@@ -60,8 +60,13 @@
         })
         .then(resp => resp.json())
         .then(result => {
-            // 第5课：小票直接展示整个 Result 信封——code/msg/data 一目了然
-            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+            // 第6课适配：后端统一异常处理后，业务错误也能拿到规范 JSON 了
+            // （第5课时点错菜还是 500 HTML 丑页，现在按 code 分流展示）
+            if (result.code === 200) {
+                document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+            } else {
+                document.getElementById('result').innerText = '❌ ' + result.msg + '（code=' + result.code + '）';
+            }
         })
         .catch(() => {
             // 点了不存在的菜：后端还是直接抛异常(第2课遗留)，返回的是 500 HTML 错误页，
