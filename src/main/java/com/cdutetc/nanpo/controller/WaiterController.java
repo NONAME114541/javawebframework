@@ -2,18 +2,22 @@ package com.cdutetc.nanpo.controller;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cdutetc.nanpo.common.Result;
 import com.cdutetc.nanpo.dao.MenuRepository;
 import com.cdutetc.nanpo.dto.OrderRequest;
 import com.cdutetc.nanpo.service.OrderService;
+import com.cdutetc.nanpo.vo.OrderPageVO;
 import com.cdutetc.nanpo.vo.OrderVO;
 
 /**
@@ -48,5 +52,26 @@ public class WaiterController {
     @PostMapping("/order")
     public Result<OrderVO> order(@RequestBody OrderRequest orderRequest) {
         return Result.success(orderService.createOrder(orderRequest));
+    }
+
+    // ---- 第12课：翻账本 ----
+
+    // 分页查订单：页号从 0 开始（@RequestParam 可带默认值），按下单时间倒序
+    @GetMapping("/order/list")
+    public Result<OrderPageVO> listOrders(@RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "5") int size) {
+        return Result.success(orderService.getOrderPage(page, size));
+    }
+
+    // 订单详情：路径变量 /order/1（与 /order/list、/order/search 字面量精确匹配优先）
+    @GetMapping("/order/{id}")
+    public Result<OrderVO> getOrder(@PathVariable Long id) {
+        return Result.success(orderService.getOrder(id));
+    }
+
+    // 按菜名查订单："谁点过回锅肉"（JPQL 联表）
+    @GetMapping("/order/search")
+    public Result<List<OrderVO>> searchByDish(@RequestParam String dish) {
+        return Result.success(orderService.searchByDish(dish));
     }
 }

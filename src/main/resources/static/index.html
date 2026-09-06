@@ -20,9 +20,13 @@
 <div id="menu">菜单加载中…</div>
 
 <button onclick="order()">下单</button>
+<button onclick="loadOrders()" style="background:#555; margin-top:8px;">📖 翻账本（最近订单）</button>
 
 <!-- 小票区：展示 POST /order 的返回结果 -->
 <pre id="result">小票将显示在这里</pre>
+
+<!-- 账本区：展示 GET /order/list 的返回结果 -->
+<pre id="orders"></pre>
 
 <script>
     // 第5课适配：后端统一返回 Result{code,msg,data} 后，菜单要从 result.data 里取
@@ -73,6 +77,15 @@
             // JSON 解析失败会走到这里——这个丑陋报错，第6课"统一异常处理"来修复
             document.getElementById('result').innerText = '❌ 服务器开小差了（500）';
         });
+    }
+
+    // 第12课：翻账本——分页查最近 5 笔订单（page 从 0 开始）
+    function loadOrders() {
+        fetch('/order/list?page=0&size=5')
+            .then(resp => resp.json())
+            .then(result => {
+                document.getElementById('orders').innerText = JSON.stringify(result, null, 2);
+            });
     }
 </script>
 </body>

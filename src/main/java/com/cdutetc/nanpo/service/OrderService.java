@@ -2,7 +2,11 @@ package com.cdutetc.nanpo.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +18,7 @@ import com.cdutetc.nanpo.dto.OrderRequest;
 import com.cdutetc.nanpo.entity.Menu;
 import com.cdutetc.nanpo.entity.Order;
 import com.cdutetc.nanpo.entity.OrderItem;
+import com.cdutetc.nanpo.vo.OrderPageVO;
 import com.cdutetc.nanpo.vo.OrderVO;
 
 /**
@@ -76,5 +81,35 @@ public class OrderService {
         OrderVO vo = OrderVO.from(saved);
         vo.setMsg("下单成功，请到取餐口稍等～（订单号 " + saved.getId() + "）");
         return vo;
+    }
+
+    // ---- 第12课：翻账本（分页/详情/联表查询）----
+
+    /** 分页查订单：页号从 0 开始，按下单时间倒序（最新在前） */
+    public OrderPageVO getOrderPage(int page, int size) {
+        Page<Order> orderPage = orderRepository.findAll(
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createTime")));
+
+        // Page → VO 的组装放 Service（VO 不沾框架类型）
+        OrderPageVO vo = new OrderPageVO();
+        vo.setRecords(orderPage.getContent().stream().map(OrderVO::from).toList());
+        vo.setTotalElements(orderPage.getTotalElements());
+        vo.setTotalPages(orderPage.getTotalPages());
+        vo.setPageNum(orderPage.getNumber());
+        vo.setPageSize(orderPage.getSize());
+        return vo;
+    }
+
+    /** 订单详情：查不到抛业务异常（复用第6课的处理台） */
+    public OrderVO getOrder(Long id) {
+        return OrderVO.from(orderRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.ORDER_NOT_FOUND)));
+    }
+
+    /** "谁点过这道菜"：JPQL 跨 t_order/t_order_item 联表查询 */
+    public List<OrderVO> searchByDish(String dishName) {
+        return orderRepository.findByDishName(dishName).stream()
+                .map(OrderVO::from)
+                .toList();
     }
 }

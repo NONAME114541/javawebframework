@@ -13,6 +13,7 @@ public enum ErrorCodeEnum {
 
     /* 4xxxx 业务类错误 */
     DISH_NOT_FOUND(40401, "该菜品不存在"),
+    ORDER_NOT_FOUND(40402, "该订单不存在"),
     PATH_NOT_FOUND(40404, "访问路径不存在"),
 
     /* 5xxxx 系统类错误 */
