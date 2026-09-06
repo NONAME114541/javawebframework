@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,8 +20,9 @@ import com.cdutetc.nanpo.service.SideDishService;
 /**
  * 服务员。
  * 第2课：一个人包揽所有活——背菜谱、验菜算账、还要顺手"炒菜"。
- * 第3课：店里招人了——配菜交给墩子(SideDishService)、炒菜交给厨师(CookService)，
- *        服务员只负责接单、验菜、算账，形成调用链：服务员 → 墩子 → 厨师。
+ * 第3课：招入墩子和厨师，形成调用链：服务员 → 墩子 → 厨师（但员工是自己 new 的）。
+ * 第4课：人事权上交——员工由总部(IoC 容器)统一委派，服务员不再自己 new，
+ *        只声明"我需要谁"(@Autowired)，容器在启动时把员工送上门（依赖注入）。
  */
 @RestController
 public class WaiterController {
@@ -36,11 +38,13 @@ public class WaiterController {
         MENU.put("米饭", 1);
     }
 
-    // 第3课：服务员自己"招人"——手动 new。
-    // 想想有什么问题：谁都能 new 一份、无法统一管理、多个服务员无法共享同一批员工……
-    // 这些问题正是第4课 IoC 容器要解决的
-    private final SideDishService sideDishService = new SideDishService();
-    private final CookService cookService = new CookService();
+    // 第4课：由第3课的"手动 new"改为容器注入——控制权反转(IoC)。
+    // 对比：第3课 new SideDishService()，服务员自己造人、每个服务员各造一份；
+    //      现在 @Autowired 声明依赖，容器启动时把全局唯一的单例赋值进来
+    @Autowired
+    private SideDishService sideDishService;
+    @Autowired
+    private CookService cookService;
 
     // 查菜单：故意返回裸 Map——第5课"统一返回"时回来整改
     @GetMapping("/menu")
@@ -68,8 +72,7 @@ public class WaiterController {
             int subTotal = unitPrice * count;
             total += subTotal;
 
-            // 第3课：厨房分工——墩子先配菜，厨师再炒菜。
-            // （第2课的"[服务员] 炒好了"打印已删除：炒菜不再是服务员的活）
+            // 第3课：厨房分工——墩子先配菜，厨师再炒菜
             sideDishService.prepareSideMaterial(dishName, count);
             cookService.cookDish(dishName, count);
 
