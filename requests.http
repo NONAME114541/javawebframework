@@ -1,0 +1,58 @@
+### 南坡小炒 · 课程接口验证文件（REST Client）
+### 用法：启动程序后，点击每个请求上方的运行按钮发送
+### 这个文件每课都会新增请求，是贯穿全课程的"点餐工具"
+
+##############################################
+# 第1课 · 开店迎客
+##############################################
+
+### 1.1 开业检查：店开了没有？（预期 200 + 一行文字）
+GET http://localhost:8080/hello
+
+### 1.2 访问不存在的路径（第1课：404+timestamp；第6课起：code=40404 信封）
+GET http://localhost:8080/nobody-home
+
+##############################################
+# 第2课 · 服务员接第一单
+##############################################
+
+### 2.1 查菜单（预期 6 道菜）
+GET http://localhost:8080/menu
+
+### 2.2 正常点单：回锅肉x2 + 米饭x2（预期 totalMoney=38）
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "dishList": [
+    { "dishName": "回锅肉", "count": 2 },
+    { "dishName": "米饭", "count": 2 }
+  ]
+}
+
+### 2.3 点不存在的菜——佛跳墙（第6课起预期：code=40401 信封，不再是500）
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "dishList": [
+    { "dishName": "佛跳墙", "count": 1 }
+  ]
+}
+
+##############################################
+# 第6课 · 统一客诉处理台
+##############################################
+
+### 6.1 点不存在的菜（预期：状态码200，信封 code=40401）
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "dishList": [
+    { "dishName": "佛跳墙", "count": 1 }
+  ]
+}
+
+### 6.2 访问不存在的路径（预期：信封 code=40404）
+GET http://localhost:8080/no-such-page
