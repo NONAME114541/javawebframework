@@ -2,5 +2,24 @@ spring:
   application:
     name: nanpo-xiaochao
 
+  # 第7课：账本（数据源）四要素
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:nanpo    # 内存库：应用一停数据就清零（第19课换 MySQL 容器持久化）
+    username: sa
+    password:
+
+  # 第7课：H2 网页控制台——注意还需要 pom 里引入 spring-boot-h2console 模块（Boot 4 拆分）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # 第7课：JPA——实体怎么变成表
+  jpa:
+    hibernate:
+      ddl-auto: update        # create/create-drop/update/none 四个取值课堂对比
+    show-sql: true            # 控制台打印 SQL，第8课起"眼见为实"看 JPA 生成的语句
+
 server:
   port: 8080
