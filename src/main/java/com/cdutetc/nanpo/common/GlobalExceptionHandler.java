@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -29,6 +30,14 @@ public class GlobalExceptionHandler {
     public Result<?> handleNoResource(NoResourceFoundException e) {
         log.warn("路径不存在: {}", e.getMessage());
         return Result.fail(ErrorCodeEnum.PATH_NOT_FOUND);
+    }
+
+    // 第14课兑现第6课的承诺：上传超限异常接入处理台——
+    // multipart 解析阶段就拒绝，根本到不了 Controller
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public Result<?> handleMaxUploadSize(MaxUploadSizeExceededException e) {
+        log.warn("上传文件超过大小限制: {}", e.getMessage());
+        return Result.fail(ErrorCodeEnum.FILE_TOO_LARGE);
     }
 
     // 系统异常兜底：真事故——error 级别记录完整堆栈，对顾客只说"内部错误"

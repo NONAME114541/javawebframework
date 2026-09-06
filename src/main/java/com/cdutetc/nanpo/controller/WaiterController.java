@@ -1,9 +1,6 @@
 package com.cdutetc.nanpo.controller;
 
-import java.math.BigDecimal;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +14,7 @@ import com.cdutetc.nanpo.common.Result;
 import com.cdutetc.nanpo.dao.MenuRepository;
 import com.cdutetc.nanpo.dto.OrderRequest;
 import com.cdutetc.nanpo.service.OrderService;
+import com.cdutetc.nanpo.vo.MenuVO;
 import com.cdutetc.nanpo.vo.OrderPageVO;
 import com.cdutetc.nanpo.vo.OrderVO;
 
@@ -40,12 +38,11 @@ public class WaiterController {
     @Autowired
     private OrderService orderService;
 
-    // 查菜单：数据来源 t_menu 表，对外保持 Map{菜名:价格}，前端零改动
+    // 查菜单：第14课整改——加了 imageUrl 后 Map{菜名:价格} 装不下了，
+    // 出参升级为 List<MenuVO>（前端同步适配，第五次前后端联动）
     @GetMapping("/menu")
-    public Result<Map<String, BigDecimal>> getMenu() {
-        Map<String, BigDecimal> menu = new LinkedHashMap<>();
-        menuRepository.findAll().forEach(m -> menu.put(m.getDishName(), m.getPrice()));
-        return Result.success(menu);
+    public Result<List<MenuVO>> getMenu() {
+        return Result.success(menuRepository.findAll().stream().map(MenuVO::from).toList());
     }
 
     // 点单：接单（dto 入参）→ 调收银台 → 回话（vo 出参）

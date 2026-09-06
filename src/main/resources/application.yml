@@ -21,6 +21,13 @@ spring:
       ddl-auto: update        # create/create-drop/update/none 四个取值课堂对比
     show-sql: true            # 控制台打印 SQL，第8课起"眼见为实"看 JPA 生成的语句
 
+  # 第14课：上传大小限制——超限在 multipart 解析阶段就被拒绝，
+  # MaxUploadSizeExceededException 由第6课的统一异常处理台接住
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+
 server:
   port: 8080
 

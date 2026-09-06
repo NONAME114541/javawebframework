@@ -7,6 +7,8 @@
         body { font-family: "PingFang SC", sans-serif; max-width: 420px; margin: 40px auto; background: #faf7f2; padding: 0 16px; }
         h1 { text-align: center; }
         .dish { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px dashed #ddd; }
+        .dish img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; vertical-align: middle; margin-right: 6px; }
+        .placeholder { display: inline-block; width: 48px; height: 48px; line-height: 48px; text-align: center; background: #eee; border-radius: 6px; margin-right: 6px; }
         .price { color: #c0392b; font-weight: bold; }
         button { width: 100%; padding: 12px; margin-top: 16px; font-size: 16px; background: #c0392b; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
         input[type=number] { width: 56px; }
@@ -29,19 +31,22 @@
 <pre id="orders"></pre>
 
 <script>
-    // 第5课适配：后端统一返回 Result{code,msg,data} 后，菜单要从 result.data 里取
+    // 第14课适配（第五次前后端联动）：/menu 从 Map{菜名:价格} 升级为 List<MenuVO>
+    // ——加了 imageUrl 后 Map 装不下了；有照片显示照片，没照片显示占位图标
     fetch('/menu')
         .then(resp => resp.json())
         .then(result => {
-            const menu = result.data;
             let html = '';
-            for (const [dishName, price] of Object.entries(menu)) {
+            result.data.forEach(dish => {
+                const img = dish.imageUrl
+                    ? `<img src="${dish.imageUrl}" alt="${dish.dishName}">`
+                    : `<span class="placeholder">🍽️</span>`;
                 html += `
                 <div class="dish">
-                    <span>${dishName} <span class="price">￥${price}</span></span>
-                    <span>数量 <input type="number" min="0" value="0" data-dish="${dishName}"></span>
+                    <span>${img} ${dish.dishName} <span class="price">￥${dish.price}</span></span>
+                    <span>数量 <input type="number" min="0" value="0" data-dish="${dish.dishName}"></span>
                 </div>`;
-            }
+            });
             document.getElementById('menu').innerHTML = html;
         });
 
