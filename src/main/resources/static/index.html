@@ -25,10 +25,11 @@
 <pre id="result">小票将显示在这里</pre>
 
 <script>
-    // 页面打开：向 GET /menu 要菜单，渲染成"菜名+价格+数量输入框"列表
+    // 第5课适配：后端统一返回 Result{code,msg,data} 后，菜单要从 result.data 里取
     fetch('/menu')
         .then(resp => resp.json())
-        .then(menu => {
+        .then(result => {
+            const menu = result.data;
             let html = '';
             for (const [dishName, price] of Object.entries(menu)) {
                 html += `
@@ -58,8 +59,14 @@
             body: JSON.stringify({ dishList: dishList })
         })
         .then(resp => resp.json())
-        .then(receipt => {
-            document.getElementById('result').innerText = JSON.stringify(receipt, null, 2);
+        .then(result => {
+            // 第5课：小票直接展示整个 Result 信封——code/msg/data 一目了然
+            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+        })
+        .catch(() => {
+            // 点了不存在的菜：后端还是直接抛异常(第2课遗留)，返回的是 500 HTML 错误页，
+            // JSON 解析失败会走到这里——这个丑陋报错，第6课"统一异常处理"来修复
+            document.getElementById('result').innerText = '❌ 服务器开小差了（500）';
         });
     }
 </script>

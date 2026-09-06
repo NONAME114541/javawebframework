@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cdutetc.nanpo.common.Result;
 import com.cdutetc.nanpo.pojo.OrderItem;
 import com.cdutetc.nanpo.pojo.OrderRequest;
 import com.cdutetc.nanpo.pojo.OrderResponse;
@@ -21,8 +22,8 @@ import com.cdutetc.nanpo.service.SideDishService;
  * 服务员。
  * 第2课：一个人包揽所有活——背菜谱、验菜算账、还要顺手"炒菜"。
  * 第3课：招入墩子和厨师，形成调用链：服务员 → 墩子 → 厨师（但员工是自己 new 的）。
- * 第4课：人事权上交——员工由总部(IoC 容器)统一委派，服务员不再自己 new，
- *        只声明"我需要谁"(@Autowired)，容器在启动时把员工送上门（依赖注入）。
+ * 第4课：人事权上交——员工由 IoC 容器统一委派（@Autowired 依赖注入）。
+ * 第5课：小票格式统一——所有返回都包上 Result{code, msg, data}。
  */
 @RestController
 public class WaiterController {
@@ -38,23 +39,21 @@ public class WaiterController {
         MENU.put("米饭", 1);
     }
 
-    // 第4课：由第3课的"手动 new"改为容器注入——控制权反转(IoC)。
-    // 对比：第3课 new SideDishService()，服务员自己造人、每个服务员各造一份；
-    //      现在 @Autowired 声明依赖，容器启动时把全局唯一的单例赋值进来
+    // 第4课：由第3课的"手动 new"改为容器注入——控制权反转(IoC)
     @Autowired
     private SideDishService sideDishService;
     @Autowired
     private CookService cookService;
 
-    // 查菜单：故意返回裸 Map——第5课"统一返回"时回来整改
+    // 查菜单：第5课整改——从第2课的"裸 Map"换成统一小票 Result
     @GetMapping("/menu")
-    public Map<String, Integer> getMenu() {
-        return MENU;
+    public Result<Map<String, Integer>> getMenu() {
+        return Result.success(MENU);
     }
 
     // 点单：@RequestBody 把前端提交的 JSON 自动装配成 OrderRequest 对象
     @PostMapping("/order")
-    public OrderResponse order(@RequestBody OrderRequest orderRequest) {
+    public Result<OrderResponse> order(@RequestBody OrderRequest orderRequest) {
         OrderResponse resp = new OrderResponse();
         List<OrderItem> itemList = new ArrayList<>();
         int total = 0;
@@ -87,6 +86,7 @@ public class WaiterController {
         resp.setItemList(itemList);
         resp.setTotalMoney(total);
         resp.setMsg("下单成功，请到取餐口稍等～");
-        return resp;
+        // 第5课整改：小票也包进统一返回
+        return Result.success(resp);
     }
 }
