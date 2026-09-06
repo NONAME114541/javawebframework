@@ -29,3 +29,9 @@ server:
 # 演示方式：启动加 -Ddemo.kitchen-failure=true（系统属性优先级高于本文件）
 demo:
   kitchen-failure: false
+
+# 第13课：文件存储目录外部化——面向接口+配置外部化，
+# 第19课换 MinIO 时只改配置和实现类，业务代码零改动
+nanpo:
+  storage:
+    dir: ./upload
