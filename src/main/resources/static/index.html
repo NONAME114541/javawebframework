@@ -15,6 +15,12 @@
         .auth { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
         .auth input { flex: 1; min-width: 80px; padding: 6px; }
         .auth-btn { width: auto; margin-top: 0; padding: 6px 12px; font-size: 14px; background: #555; }
+        .ai { margin-top: 20px; padding: 12px; background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; }
+        .ai h3 { margin: 0 0 8px; font-size: 15px; }
+        .ai input { flex: 1; min-width: 200px; padding: 6px; }
+        .ai > div:first-of-type { display: flex; gap: 6px; }
+        .ai-btn { width: auto; margin-top: 0; padding: 6px 12px; font-size: 14px; background: #2980b9; }
+        .ai-reply { margin-top: 8px; padding: 10px; background: #f4f9ff; border-radius: 6px; font-size: 14px; min-height: 20px; white-space: pre-wrap; }
         pre { background: #333; color: #9f9; padding: 12px; border-radius: 6px; min-height: 48px; font-size: 12px; }
     </style>
 </head>
@@ -41,6 +47,16 @@
 
 <!-- 账本区：展示 GET /order/list 的返回结果 -->
 <pre id="orders"></pre>
+
+<!-- AI 区（第17课）：AI 服务员小智 -->
+<div class="ai">
+    <h3>🤖 AI 服务员·小智</h3>
+    <div>
+        <input id="aiInput" placeholder="问小智：有什么不辣的菜？">
+        <button class="ai-btn" onclick="askAi()">问小智</button>
+    </div>
+    <div id="aiReply" class="ai-reply">小智待命中…（未配置 NANPO_AI_KEY 时会说"AI 服务暂时不可用"）</div>
+</div>
 
 <script>
     // ===== 会员（第16课）：令牌管理与登录 =====
@@ -143,6 +159,22 @@
             .then(result => {
                 document.getElementById('orders').innerText = JSON.stringify(result, null, 2);
             });
+    }
+
+    // ===== AI 服务员（第17课）：和小智聊天 =====
+    function askAi() {
+        const msg = aiInput.value.trim();
+        if (!msg) { alert('想问点什么？'); return; }
+        aiReply.textContent = '小智思考中…';
+        fetch('/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+        })
+        .then(r => r.json())
+        .then(result => {
+            aiReply.textContent = result.code === 200 ? result.data : '❌ ' + result.msg;
+        });
     }
 </script>
 </body>

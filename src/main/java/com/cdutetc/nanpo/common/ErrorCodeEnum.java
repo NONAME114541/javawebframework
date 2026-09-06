@@ -26,7 +26,8 @@ public enum ErrorCodeEnum {
     TOKEN_INVALID(40102, "令牌无效或已过期，请重新登录"),
 
     /* 5xxxx 系统类错误 */
-    SYSTEM_ERROR(50001, "服务器内部错误");
+    SYSTEM_ERROR(50001, "服务器内部错误"),
+    AI_SERVICE_ERROR(50002, "AI 服务暂时不可用，请稍后再试");
 
     private final Integer code;
     private final String msg;

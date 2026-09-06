@@ -28,6 +28,22 @@ spring:
       max-file-size: 2MB
       max-request-size: 2MB
 
+  # 第17课：AI 服务员——OpenAI 兼容端点（默认智谱 GLM，DeepSeek/DashScope 皆可换）。
+  # Key 用环境变量 NANPO_AI_KEY 注入（与第15课 JWT 密钥同一套思路）：
+  #   export NANPO_AI_KEY=你的key && ./mvnw spring-boot:run
+  # 不配置也能启动——AI 接口返回"AI 服务暂时不可用"（50002），其余功能不受影响。
+  # 智谱注意：兼容端点在 /api/paas/v4，而 Spring AI 默认拼 /v1/chat/completions，
+  # 所以 base-url 写到 v4、completions-path 改成 /chat/completions
+  ai:
+    openai:
+      api-key: ${NANPO_AI_KEY:demo-key-not-set}
+      base-url: ${NANPO_AI_BASE:https://open.bigmodel.cn/api/paas/v4}
+      chat:
+        completions-path: ${NANPO_AI_CHAT_PATH:/chat/completions}
+        options:
+          model: ${NANPO_AI_MODEL:glm-4-flash}
+          temperature: 0.7
+
 server:
   port: 8080
 
