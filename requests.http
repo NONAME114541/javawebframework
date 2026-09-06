@@ -196,3 +196,32 @@ Content-Type: application/json
 ### 16.7 翻账本看订单记名（预期 records 里有 username）
 GET http://localhost:8080/order/list?page=0&size=5
 Authorization: Bearer <accessToken>
+
+##############################################
+# 第17课 · AI 服务员（需配置环境变量 NANPO_AI_KEY 后返回真实回复；无 Key 预期 50002）
+# 启动方式：export NANPO_AI_KEY=你的key && ./mvnw spring-boot:run
+##############################################
+
+### 17.1 和小智聊天（问菜单会触发工具调用查真实菜单）
+POST http://localhost:8080/ai/chat
+Content-Type: application/json
+
+{ "message": "你们店有什么菜？有什么不辣的吗？" }
+
+##############################################
+# 第18课 · AI 会下单（需登录 + Key；未登录 40101；无 Key 50002）
+##############################################
+
+### 18.1 说句话让小智下单（预期返回订单小票：orderId/itemList/totalMoney）
+POST http://localhost:8080/order/ai
+Content-Type: application/json
+Authorization: Bearer <accessToken>
+
+{ "message": "来份回锅肉，两碗米饭，再来个不辣的素菜" }
+
+### 18.2 AI 识别不出菜品（预期 code=40401——幻觉被业务校验兜住）
+POST http://localhost:8080/order/ai
+Content-Type: application/json
+Authorization: Bearer <accessToken>
+
+{ "message": "来份北京烤鸭，要全聚德的" }

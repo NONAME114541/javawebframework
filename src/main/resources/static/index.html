@@ -54,6 +54,7 @@
     <div>
         <input id="aiInput" placeholder="问小智：有什么不辣的菜？">
         <button class="ai-btn" onclick="askAi()">问小智</button>
+        <button class="ai-btn" style="background:#c0392b" onclick="orderAi()">帮我下单</button>
     </div>
     <div id="aiReply" class="ai-reply">小智待命中…（未配置 NANPO_AI_KEY 时会说"AI 服务暂时不可用"）</div>
 </div>
@@ -174,6 +175,24 @@
         .then(r => r.json())
         .then(result => {
             aiReply.textContent = result.code === 200 ? result.data : '❌ ' + result.msg;
+        });
+    }
+
+    // 第18课：让小智帮你下单——说句话即可（要已登录：AI 下单也要亮卡）
+    function orderAi() {
+        const msg = aiInput.value.trim();
+        if (!msg) { alert('告诉小智你想吃什么'); return; }
+        aiReply.textContent = '小智下单中…';
+        fetch('/order/ai', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ message: msg })
+        })
+        .then(r => r.json())
+        .then(result => {
+            aiReply.textContent = result.code === 200
+                ? '✅ ' + result.data.msg + '\n' + JSON.stringify(result.data, null, 2)
+                : '❌ ' + result.msg + '（code=' + result.code + '）';
         });
     }
 </script>
