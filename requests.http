@@ -68,7 +68,7 @@ GET http://localhost:8080/h2-console
 # 第12课 · 翻账本（分页/详情/联表查询）
 ##############################################
 
-### 12.1 分页查订单（第0页每页2条，倒序——最新在前）
+### 12.1 分页查订单（第0页每页2条，倒序——最新在前；第16课起需带 Authorization 头，否则 40101）
 GET http://localhost:8080/order/list?page=0&size=2
 
 ### 12.2 订单详情（id 换成你实际有的订单号）
@@ -121,3 +121,78 @@ GET http://localhost:8080/download/nope.png
 
 ### 14.4 路径穿越攻击演练（预期被 Tomcat 拦下：400）
 GET http://localhost:8080/download/..%2Fpom.xml
+
+##############################################
+# 第15课 · 办会员卡（注册/登录/JWT）
+##############################################
+
+### 15.1 办卡（注册）
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{ "username": "xiaoming", "password": "123456", "nickname": "小明" }
+
+### 15.2 重复办卡（预期 code=40407）
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{ "username": "xiaoming", "password": "123456" }
+
+### 15.3 登录（预期拿到长短两张卡；第15课单卡，第16课起返回 accessToken+refreshToken）
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{ "username": "xiaoming", "password": "123456" }
+
+### 15.4 密码错误（预期 code=40408）
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{ "username": "xiaoming", "password": "wrong" }
+
+##############################################
+# 第16课 · 查票与续卡（把 15.3 返回的两张卡分别粘到各占位处）
+##############################################
+
+### 16.1 不带令牌下单（预期 code=40101 请先登录）
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{ "dishList": [ { "dishName": "米饭", "count": 1 } ] }
+
+### 16.2 伪造令牌下单（预期 code=40102）
+POST http://localhost:8080/order
+Content-Type: application/json
+Authorization: Bearer fake.token.here
+
+{ "dishList": [ { "dishName": "米饭", "count": 1 } ] }
+
+### 16.3 短卡(accessToken)下单（预期 200，订单记名）
+POST http://localhost:8080/order
+Content-Type: application/json
+Authorization: Bearer <accessToken>
+
+{ "dishList": [ { "dishName": "回锅肉", "count": 1 } ] }
+
+### 16.4 长卡(refreshToken)当短卡用（预期 40102——各卡各用）
+POST http://localhost:8080/order
+Content-Type: application/json
+Authorization: Bearer <refreshToken>
+
+{ "dishList": [ { "dishName": "米饭", "count": 1 } ] }
+
+### 16.5 续卡：长卡换新短卡（预期返回新的一对卡）
+POST http://localhost:8080/refresh
+Content-Type: application/json
+
+{ "refreshToken": "<refreshToken>" }
+
+### 16.6 拿短卡来续卡（预期 40102）
+POST http://localhost:8080/refresh
+Content-Type: application/json
+
+{ "refreshToken": "<accessToken>" }
+
+### 16.7 翻账本看订单记名（预期 records 里有 username）
+GET http://localhost:8080/order/list?page=0&size=5
+Authorization: Bearer <accessToken>
