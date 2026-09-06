@@ -39,6 +39,11 @@ public class Order {
 
     private LocalDateTime createTime;
 
+    /** 下单人（第16课：订单终于知道是谁下的）。username 冗余存一份——
+        和第9课价格快照同理：用户改名，历史订单仍显示下单时的名字 */
+    private Long userId;
+    private String username;
+
     // 双向关联里 lombok 的 toString/equals 会沿着 order→items→order 互相调用，
     // 不排除会无限递归——两个 @xxxExclude 是规矩写法
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

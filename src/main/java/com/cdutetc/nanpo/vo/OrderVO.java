@@ -19,6 +19,8 @@ import lombok.Data;
 public class OrderVO {
 
     private Long orderId;
+    private Long userId;
+    private String username;   // 下单人（第16课：登录后订单记名）
     private List<OrderItemVO> itemList;
     private BigDecimal totalMoney;
     private String msg;
@@ -28,6 +30,8 @@ public class OrderVO {
     public static OrderVO from(Order order) {
         OrderVO vo = new OrderVO();
         vo.setOrderId(order.getId());
+        vo.setUserId(order.getUserId());
+        vo.setUsername(order.getUsername());
         vo.setTotalMoney(order.getTotalAmount());
         List<OrderItemVO> items = new ArrayList<>();
         for (OrderItem item : order.getOrderItems()) {

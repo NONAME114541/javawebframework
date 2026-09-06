@@ -15,41 +15,53 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 /**
- * JWT 工具（第15课）。
- * 令牌长这样：xxxxx.yyyyy.zzzzz 三段式——
- *   x=Header(算法)  y=Payload(数据+过期时间)  z=Signature(签名，防篡改)
- * 前两段只是 Base64（谁都能解开看，所以别放密码！），第三段用密钥签名——
- * 改一个字母签名就对不上。可到 jwt.io 现场解码体验。
+ * JWT 工具。
+ * 第15课：单张卡（120 分钟）。
+ * 第16课升级为长短两张卡：
+ *   accessToken（15分钟，天天用）+ refreshToken（7天，只用来续卡）——
+ *   短卡丢了损失小，长卡尽量少出门，被偷的风险就小；
+ *   两张卡靠 Payload 里的 type 声明区分，各卡各用、不能混用。
  */
 @Component
 public class JwtUtil {
 
+    public static final String TYPE_ACCESS = "access";
+    public static final String TYPE_REFRESH = "refresh";
+
     @Value("${nanpo.jwt.secret}")
     private String secret;
 
-    @Value("${nanpo.jwt.ttl-minutes:120}")
-    private long ttlMinutes;
+    @Value("${nanpo.jwt.access-ttl-minutes:15}")
+    private long accessTtlMinutes;
+
+    @Value("${nanpo.jwt.refresh-ttl-days:7}")
+    private long refreshTtlDays;
 
     private SecretKey key() {
         // HS256 要求密钥 ≥ 32 字节
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    /** 签发令牌：把"谁"（userId/username）和"有效期"写进 Payload 并签名 */
-    public String generateToken(Long userId, String username) {
+    public String generateAccessToken(Long userId, String username) {
+        return generate(userId, username, Duration.ofMinutes(accessTtlMinutes), TYPE_ACCESS);
+    }
+
+    public String generateRefreshToken(Long userId, String username) {
+        return generate(userId, username, Duration.ofDays(refreshTtlDays), TYPE_REFRESH);
+    }
+
+    private String generate(Long userId, String username, Duration ttl, String type) {
         return Jwts.builder()
-                .subject(String.valueOf(userId))          // sub：主题=用户id
-                .claim("username", username)               // 自定义声明
-                .issuedAt(new Date())                      // iat：签发时间
-                .expiration(Date.from(Instant.now().plus(Duration.ofMinutes(ttlMinutes))))  // exp：过期时间
-                .signWith(key())                           // 签名
+                .subject(String.valueOf(userId))
+                .claim("username", username)
+                .claim("type", type)                              // access / refresh
+                .issuedAt(new Date())
+                .expiration(Date.from(Instant.now().plus(ttl)))
+                .signWith(key())
                 .compact();
     }
 
-    /**
-     * 解析并校验令牌：签名不对/过期/格式坏都会抛 JwtException 子类。
-     * 校验通过返回 Payload（Claims）。
-     */
+    /** 解析并校验：签名不对/过期/格式坏抛 JwtException 子类，通过则返回 Payload */
     public Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key())
@@ -58,7 +70,7 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public long getTtlMinutes() {
-        return ttlMinutes;
+    public long getAccessTtlMinutes() {
+        return accessTtlMinutes;
     }
 }

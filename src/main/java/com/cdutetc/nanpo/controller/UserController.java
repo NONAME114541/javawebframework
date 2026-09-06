@@ -7,13 +7,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdutetc.nanpo.common.Result;
 import com.cdutetc.nanpo.dto.LoginRequest;
+import com.cdutetc.nanpo.dto.RefreshRequest;
 import com.cdutetc.nanpo.dto.RegisterRequest;
 import com.cdutetc.nanpo.service.UserService;
 import com.cdutetc.nanpo.vo.LoginVO;
 
 /**
- * 会员窗口（第15课）：办卡与登录。
- * 第三个 Controller——店里新开了会员窗口。
+ * 会员窗口：办卡、登录、续卡。
+ * 第15课新增：/register /login（单张卡）。
+ * 第16课新增：/refresh（长短双卡——长卡换新短卡）。
  */
 @RestController
 public class UserController {
@@ -28,9 +30,15 @@ public class UserController {
         return Result.success();
     }
 
-    // 登录：验证通过发 JWT 令牌
+    // 登录：发长短两张卡
     @PostMapping("/login")
     public Result<LoginVO> login(@RequestBody LoginRequest req) {
         return Result.success(userService.login(req));
+    }
+
+    // 续卡：refreshToken 换新的 accessToken（短卡过期了不用重新输密码）
+    @PostMapping("/refresh")
+    public Result<LoginVO> refresh(@RequestBody RefreshRequest req) {
+        return Result.success(userService.refresh(req));
     }
 }

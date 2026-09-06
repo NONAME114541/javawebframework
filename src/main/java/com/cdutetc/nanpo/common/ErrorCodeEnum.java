@@ -21,6 +21,10 @@ public enum ErrorCodeEnum {
     USERNAME_TAKEN(40407, "用户名已被占用"),
     LOGIN_FAILED(40408, "用户名或密码错误"),
 
+    /* 401xx 认证类 */
+    TOKEN_MISSING(40101, "请先登录（缺少令牌）"),
+    TOKEN_INVALID(40102, "令牌无效或已过期，请重新登录"),
+
     /* 5xxxx 系统类错误 */
     SYSTEM_ERROR(50001, "服务器内部错误");
 

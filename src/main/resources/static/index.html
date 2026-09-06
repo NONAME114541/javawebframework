@@ -12,11 +12,23 @@
         .price { color: #c0392b; font-weight: bold; }
         button { width: 100%; padding: 12px; margin-top: 16px; font-size: 16px; background: #c0392b; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
         input[type=number] { width: 56px; }
+        .auth { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .auth input { flex: 1; min-width: 80px; padding: 6px; }
+        .auth-btn { width: auto; margin-top: 0; padding: 6px 12px; font-size: 14px; background: #555; }
         pre { background: #333; color: #9f9; padding: 12px; border-radius: 6px; min-height: 48px; font-size: 12px; }
     </style>
 </head>
 <body>
 <h1>🍜 南坡小炒</h1>
+
+<!-- 会员区（第16课）：先登录，下单才带得上令牌 -->
+<div class="auth">
+    <input id="username" placeholder="会员名">
+    <input id="password" type="password" placeholder="密码">
+    <button class="auth-btn" onclick="register()">办卡</button>
+    <button class="auth-btn" onclick="login()">登录</button>
+    <span id="who" style="color:#27ae60"></span>
+</div>
 
 <!-- 菜单区：页面打开后由 fetch(/menu) 填充 -->
 <div id="menu">菜单加载中…</div>
@@ -31,6 +43,45 @@
 <pre id="orders"></pre>
 
 <script>
+    // ===== 会员（第16课）：令牌管理与登录 =====
+    // 所有需要亮卡的请求都带上 Authorization: Bearer <accessToken>
+    function authHeaders() {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('accessToken');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        return headers;
+    }
+
+    function register() {
+        fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username.value, password: password.value })
+        })
+        .then(r => r.json())
+        .then(result => alert(result.code === 200 ? '办卡成功，请登录' : result.msg));
+    }
+
+    function login() {
+        fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username.value, password: password.value })
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.code === 200) {
+                // 两张卡分开收好：短卡随请求带，长卡只在续卡时用
+                localStorage.setItem('accessToken', result.data.accessToken);
+                localStorage.setItem('refreshToken', result.data.refreshToken);
+                who.textContent = '会员：' + result.data.nickname;
+            } else {
+                alert(result.msg);
+            }
+        });
+    }
+
+    // ===== 菜单 =====
     // 第14课适配（第五次前后端联动）：/menu 从 Map{菜名:价格} 升级为 List<MenuVO>
     // ——加了 imageUrl 后 Map 装不下了；有照片显示照片，没照片显示占位图标
     fetch('/menu')
@@ -62,9 +113,10 @@
             alert('还没点菜呢');
             return;
         }
+        // 第16课：下单要亮卡——带 Authorization 头；未登录时后端回 40101
         fetch('/order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ dishList: dishList })
         })
         .then(resp => resp.json())
@@ -84,9 +136,9 @@
         });
     }
 
-    // 第12课：翻账本——分页查最近 5 笔订单（page 从 0 开始）
+    // 第12课：翻账本——分页查最近 5 笔订单（page 从 0 开始；第16课起也要亮卡）
     function loadOrders() {
-        fetch('/order/list?page=0&size=5')
+        fetch('/order/list?page=0&size=5', { headers: authHeaders() })
             .then(resp => resp.json())
             .then(result => {
                 document.getElementById('orders').innerText = JSON.stringify(result, null, 2);

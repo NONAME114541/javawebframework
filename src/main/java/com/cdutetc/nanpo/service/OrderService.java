@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cdutetc.nanpo.common.BusinessException;
 import com.cdutetc.nanpo.common.ErrorCodeEnum;
+import com.cdutetc.nanpo.common.UserContext;
 import com.cdutetc.nanpo.dao.MenuRepository;
 import com.cdutetc.nanpo.dao.OrderRepository;
 import com.cdutetc.nanpo.dto.OrderRequest;
@@ -52,9 +53,14 @@ public class OrderService {
     // 两个经典失效坑（课堂口头展开）：同类内部自调用、非 public 方法
     @Transactional
     public OrderVO createOrder(OrderRequest request) {
+        // 第16课：查票员(拦截器)放进来的当前会员——订单记名
+        UserContext.CurrentUser current = UserContext.require();
+
         // ---- 第一步：落单（验菜 → 算价 → 明细挂单 → 入库）----
         Order order = new Order();
         order.setCreateTime(LocalDateTime.now());
+        order.setUserId(current.userId());
+        order.setUsername(current.username());
         BigDecimal total = BigDecimal.ZERO;
 
         for (OrderRequest.DishCount dc : request.getDishList()) {
