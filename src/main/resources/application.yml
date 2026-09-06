@@ -23,3 +23,9 @@ spring:
 
 server:
   port: 8080
+
+# 第11课：课堂演示开关——厨房故障模拟。
+# true 时墩子配菜抛异常，演示"订单已落库、厨房着火"时事务的作用；
+# 演示方式：启动加 -Ddemo.kitchen-failure=true（系统属性优先级高于本文件）
+demo:
+  kitchen-failure: false
