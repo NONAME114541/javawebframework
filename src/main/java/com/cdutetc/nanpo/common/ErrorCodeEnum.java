@@ -18,6 +18,8 @@ public enum ErrorCodeEnum {
     PATH_NOT_FOUND(40404, "访问路径不存在"),
     FILE_NOT_FOUND(40405, "文件不存在"),
     FILE_TOO_LARGE(40406, "上传文件超过大小限制（最大 2MB）"),
+    USERNAME_TAKEN(40407, "用户名已被占用"),
+    LOGIN_FAILED(40408, "用户名或密码错误"),
 
     /* 5xxxx 系统类错误 */
     SYSTEM_ERROR(50001, "服务器内部错误");
