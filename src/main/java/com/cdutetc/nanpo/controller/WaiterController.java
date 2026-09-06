@@ -1,7 +1,8 @@
 package com.cdutetc.nanpo.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cdutetc.nanpo.common.BusinessException;
 import com.cdutetc.nanpo.common.ErrorCodeEnum;
 import com.cdutetc.nanpo.common.Result;
+import com.cdutetc.nanpo.dao.MenuRepository;
+import com.cdutetc.nanpo.entity.Menu;
 import com.cdutetc.nanpo.pojo.OrderItem;
 import com.cdutetc.nanpo.pojo.OrderRequest;
 import com.cdutetc.nanpo.pojo.OrderResponse;
@@ -27,31 +30,28 @@ import com.cdutetc.nanpo.service.SideDishService;
  * 第4课：人事权上交——员工由 IoC 容器统一委派（@Autowired 依赖注入）。
  * 第5课：小票格式统一——所有返回都包上 Result{code, msg, data}。
  * 第6课：客诉统一——业务问题抛 BusinessException，由 GlobalExceptionHandler 全局兜住。
+ * 第8课：菜谱上账——静态 MENU Map 彻底删除，验菜取价全部查数据库 t_menu。
  */
 @RestController
 public class WaiterController {
 
-    // 菜谱暂且写死在代码里（第8课将搬进数据库）
-    private static final Map<String, Integer> MENU = new HashMap<>();
-    static {
-        MENU.put("回锅肉", 18);
-        MENU.put("鱼香肉丝", 16);
-        MENU.put("麻婆豆腐", 12);
-        MENU.put("番茄炒蛋", 10);
-        MENU.put("蛋炒饭", 8);
-        MENU.put("米饭", 1);
-    }
+    // 第8课：从第2课用到现在的静态 MENU Map 已删除——菜单的唯一权威来源是 t_menu 表，
+    // 改价只需 update 数据库，再也不用改代码重新发版
 
-    // 第4课：由第3课的"手动 new"改为容器注入——控制权反转(IoC)
+    @Autowired
+    private MenuRepository menuRepository;
     @Autowired
     private SideDishService sideDishService;
     @Autowired
     private CookService cookService;
 
-    // 查菜单：第5课整改——从第2课的"裸 Map"换成统一小票 Result
+    // 查菜单：第8课整改——数据来源换成 t_menu 表。
+    // 对外仍保持 Map{菜名:价格} 的形状，前端零改动：换数据源，不动对外契约
     @GetMapping("/menu")
-    public Result<Map<String, Integer>> getMenu() {
-        return Result.success(MENU);
+    public Result<Map<String, BigDecimal>> getMenu() {
+        Map<String, BigDecimal> menu = new LinkedHashMap<>();
+        menuRepository.findAll().forEach(m -> menu.put(m.getDishName(), m.getPrice()));
+        return Result.success(menu);
     }
 
     // 点单：@RequestBody 把前端提交的 JSON 自动装配成 OrderRequest 对象
@@ -59,20 +59,19 @@ public class WaiterController {
     public Result<OrderResponse> order(@RequestBody OrderRequest orderRequest) {
         OrderResponse resp = new OrderResponse();
         List<OrderItem> itemList = new ArrayList<>();
-        int total = 0;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (OrderRequest.DishCount dc : orderRequest.getDishList()) {
             String dishName = dc.getDishName();
             Integer count = dc.getCount();
 
-            // 菜单里没有这道菜：第6课整改——从第2课的裸 RuntimeException
-            // 升级为带错误码的业务异常，交给 GlobalExceptionHandler 统一处理
-            if (!MENU.containsKey(dishName)) {
-                throw new BusinessException(ErrorCodeEnum.DISH_NOT_FOUND);
-            }
-            int unitPrice = MENU.get(dishName);
-            int subTotal = unitPrice * count;
-            total += subTotal;
+            // 第8课整改：验菜+取价一步完成——查 t_menu，
+            // 查不到就抛业务异常（第6课的处理台会转成规范小票）
+            Menu menu = menuRepository.findByDishName(dishName)
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.DISH_NOT_FOUND));
+
+            BigDecimal subTotal = menu.getPrice().multiply(BigDecimal.valueOf(count));
+            total = total.add(subTotal);
 
             // 第3课：厨房分工——墩子先配菜，厨师再炒菜
             sideDishService.prepareSideMaterial(dishName, count);
@@ -81,7 +80,7 @@ public class WaiterController {
             OrderItem item = new OrderItem();
             item.setDishName(dishName);
             item.setCount(count);
-            item.setUnitPrice(unitPrice);
+            item.setUnitPrice(menu.getPrice());
             item.setSubTotal(subTotal);
             itemList.add(item);
         }
