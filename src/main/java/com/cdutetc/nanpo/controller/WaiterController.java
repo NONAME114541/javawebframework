@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdutetc.nanpo.common.Result;
 import com.cdutetc.nanpo.dao.MenuRepository;
-import com.cdutetc.nanpo.pojo.OrderRequest;
-import com.cdutetc.nanpo.pojo.OrderResponse;
+import com.cdutetc.nanpo.dto.OrderRequest;
 import com.cdutetc.nanpo.service.OrderService;
+import com.cdutetc.nanpo.vo.OrderVO;
 
 /**
  * 服务员。
@@ -24,8 +24,8 @@ import com.cdutetc.nanpo.service.OrderService;
  * 第5课：小票格式统一——所有返回都包上 Result{code, msg, data}。
  * 第6课：客诉统一——业务问题抛 BusinessException，由 GlobalExceptionHandler 全局兜住。
  * 第8课：菜谱上账——验菜取价全部查数据库 t_menu。
- * 第9课：服务员瘦身——下单的全部业务搬进 OrderService（收银台），
- *        Controller 只管 HTTP 进出：接单 → 调收银台 → 回话，共一行。
+ * 第9课：服务员瘦身——下单业务搬进 OrderService（收银台），本类只剩 HTTP 进出。
+ * 第10课：入参 dto.OrderRequest、出参 vo.OrderVO——Controller 的世界再无实体。
  */
 @RestController
 public class WaiterController {
@@ -44,11 +44,9 @@ public class WaiterController {
         return Result.success(menu);
     }
 
-    // 点单：对照第2课——那时这里堆着几十行验菜算账炒菜的业务代码，
-    // 现在只剩"转交给收银台"一行。业务逻辑放 Service 层，
-    // Controller 可测试、可替换，将来 AI 点单（第18课）也能复用同一个收银台
+    // 点单：接单（dto 入参）→ 调收银台 → 回话（vo 出参）
     @PostMapping("/order")
-    public Result<OrderResponse> order(@RequestBody OrderRequest orderRequest) {
+    public Result<OrderVO> order(@RequestBody OrderRequest orderRequest) {
         return Result.success(orderService.createOrder(orderRequest));
     }
 }
