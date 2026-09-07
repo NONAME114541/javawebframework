@@ -225,3 +225,17 @@ Content-Type: application/json
 Authorization: Bearer <accessToken>
 
 { "message": "来份北京烤鸭，要全聚德的" }
+
+##############################################
+# 第19课 · 连锁开店（容器化。验证前先 docker compose up --build）
+##############################################
+
+### 19.1 健康检查（compose 探活同款端点；预期 {"status":"UP"}）
+GET http://localhost:8080/actuator/health
+
+##############################################
+# 第20课 · MCP（SSE 传输，无法用普通 http 请求验证——见手册 03 的三终端 curl 握手流程：
+#   终端A: curl -N http://localhost:8080/sse          （取 sessionId）
+#   终端B: POST /mcp/message?sessionId=... 发 initialize → tools/list → tools/call
+# 真正的 AI 客户端（Claude Desktop/Cursor 等）把 MCP server 指向 /sse 即可点菜）
+##############################################
