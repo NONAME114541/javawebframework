@@ -1,0 +1,9 @@
+# 第19课：不进镜像的文件（减小构建上下文）
+target/
+upload/
+.idea/
+.vscode/
+*.iml
+.git/
+docs/
+requests.http

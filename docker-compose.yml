@@ -1,0 +1,65 @@
+# ===== 第19课：一条命令开店——app + MySQL + MinIO =====
+# 用法：docker compose up --build
+# 验收点（两条暗线兑现）：
+#   ① H2 → MySQL：只靠 SPRING_DATASOURCE_* 环境变量，代码零改动，
+#      第8课的幂等初始化让菜单在新库自动就位；
+#   ② 本地磁盘 → MinIO：NANPO_STORAGE_TYPE=minio 换实现，接口不变。
+# AI/JWT 密钥从宿主机环境透传，配置文件里永远没有真密钥。
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: nanpo
+    volumes:
+      - mysql-data:/var/lib/mysql        # 数据卷：容器删了数据还在
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: nanpo
+      MINIO_ROOT_PASSWORD: nanpo123
+    ports:
+      - "9001:9001"    # MinIO 网页控制台（浏览器访问 http://localhost:9001）
+    volumes:
+      - minio-data:/data
+
+  app:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy      # 等 MySQL 真正就绪再起 app
+      minio:
+        condition: service_started
+    environment:
+      # ===== 暗线一：数据源换 MySQL（环境变量覆盖 yml，驱动由 URL 推断）=====
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nanpo?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123
+      # ===== 暗线二：存储换 MinIO =====
+      NANPO_STORAGE_TYPE: minio
+      NANPO_STORAGE_MINIO_ENDPOINT: http://minio:9000
+      NANPO_STORAGE_MINIO_ACCESSKEY: nanpo
+      NANPO_STORAGE_MINIO_SECRETKEY: nanpo123
+      NANPO_STORAGE_MINIO_BUCKET: nanpo
+      # ===== 密钥透传（宿主机没设就用默认值，不影响启动）=====
+      NANPO_AI_KEY: ${NANPO_AI_KEY:-demo-key-not-set}
+      NANPO_JWT_SECRET: ${NANPO_JWT_SECRET:-nanpo-dev-secret-change-me-please-0123456789}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql-data:
+  minio-data:

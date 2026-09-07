@@ -69,6 +69,24 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
+		<!-- 第19课：MySQL 驱动——容器化时用环境变量把 H2 换成 MySQL，代码零改动 -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- 第19课：MinIO 客户端——StorageService 的对象存储实现。
+		     用 8.5.x（okhttp4，Maven 生态最稳）；9.x 依赖 okhttp5/KMP，Maven 下有解析坑 -->
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>8.5.17</version>
+		</dependency>
+		<!-- 第19课：生产就绪——/actuator/health 供 docker-compose 探活 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

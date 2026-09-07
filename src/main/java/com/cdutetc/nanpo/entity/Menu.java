@@ -33,7 +33,11 @@ public class Menu {
     @Column(nullable = false)
     private BigDecimal price;   // 钱一律 BigDecimal——第2课用 Integer 是教学起点的妥协，本次一并整改
 
-    /** 菜品照片访问路径（如 /files/xxx.png）。第13课新增——ddl-auto:update 启动自动加列 */
+    /** 菜品照片访问路径（如 /files/xxx.png）。第13课新增——ddl-auto:update 启动自动加列。
+     *  第19课踩坑整改：本地路径很短，但 MinIO 预签名 URL 长达数百字符，
+     *  默认 VARCHAR(255) 存不下（Data too long for column 'image_url'）——加长到 1024。
+     *  注意 ddl-auto:update 不会修改已存在列的长度，存量库需手动 ALTER（真实运维课题） */
+    @Column(length = 1024)
     private String imageUrl;
 
     // 不用 @AllArgsConstructor：它会把 id 也算进去生成三参构造器，初始化用不上；

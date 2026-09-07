@@ -2,9 +2,9 @@ spring:
   application:
     name: nanpo-xiaochao
 
-  # 第7课：账本（数据源）四要素
+  # 第7课：账本（数据源）。第19课起不再写死 driver-class-name——
+  # Spring 能从 URL 推断驱动，这样换 MySQL 时只需环境变量覆盖下面三项即可
   datasource:
-    driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:nanpo    # 内存库：应用一停数据就清零（第19课换 MySQL 容器持久化）
     username: sa
     password:
