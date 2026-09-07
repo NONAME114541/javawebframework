@@ -69,6 +69,11 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
+		<!-- 第20课：MCP Server——把本店工具开放给 AI 客户端（Claude Desktop 等）点菜 -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+		</dependency>
 		<!-- 第19课：MySQL 驱动——容器化时用环境变量把 H2 换成 MySQL，代码零改动 -->
 		<dependency>
 			<groupId>com.mysql</groupId>
