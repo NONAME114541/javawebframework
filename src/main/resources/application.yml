@@ -6,7 +6,7 @@ spring:
   # Spring 能从 URL 推断驱动，这样换 MySQL 时只需环境变量覆盖下面三项即可
   datasource:
     url: jdbc:h2:mem:nanpo    # 内存库：应用一停数据就清零（第19课换 MySQL 容器持久化）
-    username: sa
+    username: sa            # 实验02模拟成员A：本地 H2 默认用户
     password:
 
   # 第7课：H2 网页控制台——注意还需要 pom 里引入 spring-boot-h2console 模块（Boot 4 拆分）
@@ -50,7 +50,7 @@ spring:
         version: 1.0.0
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 # 第11课：课堂演示开关——厨房故障模拟。
 # true 时墩子配菜抛异常，演示"订单已落库、厨房着火"时事务的作用；
