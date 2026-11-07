@@ -1,19 +1,25 @@
 package com.cdutetc.nanpo.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cdutetc.nanpo.common.BusinessException;
 import com.cdutetc.nanpo.common.ErrorCodeEnum;
 import com.cdutetc.nanpo.common.JwtUtil;
+import com.cdutetc.nanpo.dao.UserMapper;
 import com.cdutetc.nanpo.dao.UserRepository;
 import com.cdutetc.nanpo.dto.LoginRequest;
 import com.cdutetc.nanpo.dto.RefreshRequest;
 import com.cdutetc.nanpo.dto.RegisterRequest;
 import com.cdutetc.nanpo.entity.User;
 import com.cdutetc.nanpo.vo.LoginVO;
+import com.cdutetc.nanpo.vo.UserVO;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -28,6 +34,7 @@ import io.jsonwebtoken.JwtException;
 public class UserService {
 
     private final UserRepository userRepository;
+    private UserMapper userMapper;
     private final JwtUtil jwtUtil;
 
     // 只借 BCrypt 工具类，不引 Spring Security 全家桶（口头对比生产做法）
@@ -36,6 +43,36 @@ public class UserService {
     public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        System.out.println("[exp07] UserService.constructor ref=" + referenceId());
+    }
+
+    /** 实验07：setter 注入发生在构造后、@PostConstruct 前。 */
+    @Autowired
+    public void setUserMapper(UserMapper userMapper) {
+        this.userMapper = userMapper;
+        System.out.println("[exp07] UserService.Autowired mapperInjected="
+                + (userMapper != null) + " ref=" + referenceId());
+    }
+
+    @PostConstruct
+    public void initialize() {
+        System.out.println("[exp07] UserService.PostConstruct mapperReady="
+                + (userMapper != null) + " ref=" + referenceId());
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("[exp07] UserService.PreDestroy ref=" + referenceId());
+    }
+
+    public Optional<UserVO> findByUsername(String username) {
+        System.out.println("[exp07] UserService.query ref=" + referenceId());
+        return userMapper.findByUsername(username)
+                .map(user -> new UserVO(user.getId(), user.getUsername(), user.getNickname()));
+    }
+
+    private String referenceId() {
+        return Integer.toHexString(System.identityHashCode(this));
     }
 
     /** 办卡：用户名查重 + 密码加密入库 */

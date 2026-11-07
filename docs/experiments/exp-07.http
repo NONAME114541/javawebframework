@@ -1,0 +1,16 @@
+@base = http://localhost:8081
+
+### 先使用 exp07 profile 启动；H2 内存库每次启动为空。
+POST {{base}}/register
+Content-Type: application/json
+
+{"username":"exp07-demo","password":"Exp07DemoOnly123","nickname":"IOC实验用户"}
+
+### 查询公开资料，预期 HTTP 200、code=200，无密码字段
+GET {{base}}/ioc/users/exp07-demo
+
+### 不存在用户，预期 HTTP 404、code=404
+GET {{base}}/ioc/users/missing-exp07
+
+### 连续执行两次，预期同引用，sameInstance/injectedMatches/singletonScope 均为 true
+GET {{base}}/ioc/singleton
