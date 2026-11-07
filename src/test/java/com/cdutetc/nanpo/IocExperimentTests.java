@@ -17,6 +17,7 @@ import com.cdutetc.nanpo.common.JwtUtil;
 import com.cdutetc.nanpo.dao.UserMapper;
 import com.cdutetc.nanpo.dao.UserRepository;
 import com.cdutetc.nanpo.entity.User;
+import com.cdutetc.nanpo.service.RegistrationService;
 import com.cdutetc.nanpo.service.UserService;
 import com.cdutetc.nanpo.vo.UserVO;
 
@@ -27,6 +28,7 @@ class IocExperimentTests {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.registerBean(UserRepository.class, () -> repository);
         context.registerBean(JwtUtil.class, () -> mock(JwtUtil.class));
+        context.registerBean(RegistrationService.class, () -> mock(RegistrationService.class));
         context.register(UserMapper.class, UserService.class);
         context.refresh();
         return context;

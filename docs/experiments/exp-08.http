@@ -1,0 +1,21 @@
+@base = http://localhost:8081
+
+### 以 exp08 profile 启动，再运行。正常注册，预期 code=200。
+POST {{base}}/register
+Content-Type: application/json
+
+{"username":"exp08-manual","password":"Exp08DemoOnly123","nickname":"AOP事务实验用户"}
+
+### 预期 users=1 roles=1 USER=1
+GET {{base}}/tx-demo/state/exp08-manual
+
+### 真实唯一约束异常，预期业务code=50001（项目HTTP状态约定仍为200）
+POST {{base}}/tx-demo/duplicate-role
+Content-Type: application/json
+
+{"username":"exp08-rollback","password":"Exp08DemoOnly123","nickname":"回滚用户"}
+
+### 预期 users=0 roles=0
+GET {{base}}/tx-demo/state/exp08-rollback
+
+### existingUserId需取预先已提交的用户ID，两种传播实验见验证脚本

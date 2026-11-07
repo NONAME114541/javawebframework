@@ -20,6 +20,11 @@
 	</properties>
 
 	<dependencies>
+		<!-- 实验08：Boot 4 的 AspectJ AOP starter -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aspectj</artifactId>
+		</dependency>
 		<!-- Boot 4 起原 spring-boot-starter-web 已改名为 spring-boot-starter-webmvc -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

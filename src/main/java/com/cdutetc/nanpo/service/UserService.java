@@ -1,6 +1,5 @@
 package com.cdutetc.nanpo.service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
@@ -36,13 +35,15 @@ public class UserService {
     private final UserRepository userRepository;
     private UserMapper userMapper;
     private final JwtUtil jwtUtil;
+    private final RegistrationService registration;
 
     // 只借 BCrypt 工具类，不引 Spring Security 全家桶（口头对比生产做法）
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
+    public UserService(UserRepository userRepository, JwtUtil jwtUtil, RegistrationService registration) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        this.registration = registration;
         System.out.println("[exp07] UserService.constructor ref=" + referenceId());
     }
 
@@ -77,16 +78,7 @@ public class UserService {
 
     /** 办卡：用户名查重 + 密码加密入库 */
     public void register(RegisterRequest req) {
-        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
-            throw new BusinessException(ErrorCodeEnum.USERNAME_TAKEN);
-        }
-        User user = new User();
-        user.setUsername(req.getUsername());
-        user.setPassword(passwordEncoder.encode(req.getPassword()));
-        user.setNickname(req.getNickname() == null || req.getNickname().isBlank()
-                ? req.getUsername() : req.getNickname());
-        user.setCreateTime(LocalDateTime.now());
-        userRepository.save(user);
+        registration.register(req);
     }
 
     /** 登录：验证通过发长短两张卡 */
