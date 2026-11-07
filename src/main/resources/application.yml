@@ -50,7 +50,7 @@ spring:
         version: 1.0.0
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8082}
 
 # 第11课：课堂演示开关——厨房故障模拟。
 # true 时墩子配菜抛异常，演示"订单已落库、厨房着火"时事务的作用；
@@ -62,7 +62,7 @@ demo:
 # 第19课换 MinIO 时只改配置和实现类，业务代码零改动
 nanpo:
   storage:
-    dir: ./upload
+    dir: ./upload           # 实验02模拟成员B：文件保存在本地上传目录
   # 第15/16课：JWT 密钥与有效期。密钥 ≥32 字节（HS256 要求）；
   # 生产环境用环境变量 NANPO_JWT_SECRET 注入，绝不把真密钥提交进仓库
   jwt:
