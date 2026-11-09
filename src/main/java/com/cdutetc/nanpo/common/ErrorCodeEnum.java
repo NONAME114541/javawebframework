@@ -12,6 +12,7 @@ public enum ErrorCodeEnum {
     SUCCESS(200, "操作成功"),
 
     /* 4xxxx 业务类错误 */
+    PARAMETER_INVALID(40001, "请求参数格式或取值不正确"),
     DISH_NOT_FOUND(40401, "该菜品不存在"),
     ORDER_NOT_FOUND(40402, "该订单不存在"),
     FILE_INVALID(40403, "文件为空或格式不支持（仅限图片）"),

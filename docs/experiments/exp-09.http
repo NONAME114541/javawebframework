@@ -1,0 +1,37 @@
+@base = http://localhost:8081
+
+### 1 GET列表：查询参数绑定
+GET {{base}}/api/menus?page=0&size=5&keyword=exp09
+
+### 2 POST创建：请求体绑定，预期201+Location+统一Result
+POST {{base}}/api/menus
+Content-Type: application/json
+
+{"dishName":"exp09-青椒肉丝","price":20.50}
+
+### 3 GET详情：路径变量绑定（替换实际ID）
+GET {{base}}/api/menus/7
+
+### 4 PUT修改
+PUT {{base}}/api/menus/7
+Content-Type: application/json
+
+{"dishName":"exp09-青椒肉丝改","price":22.00}
+
+### 5 DELETE单个
+DELETE {{base}}/api/menus/7
+
+### 6 批量ID List<Long>绑定
+DELETE {{base}}/api/menus?ids=8,9
+
+### 错误URL1：动作写进路径；改为 GET /api/menus/{id}
+GET {{base}}/getMenuById?id=1
+
+### 错误URL2：create动词；改为 POST /api/menus
+POST {{base}}/createMenu
+Content-Type: application/json
+
+{}
+
+### 错误URL3：delete动词+查询ID；改为 DELETE /api/menus/{id}
+DELETE {{base}}/deleteMenu?id=1

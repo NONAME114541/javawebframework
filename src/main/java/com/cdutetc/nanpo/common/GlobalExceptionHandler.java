@@ -2,8 +2,11 @@ package com.cdutetc.nanpo.common;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -38,6 +41,14 @@ public class GlobalExceptionHandler {
     public Result<?> handleMaxUploadSize(MaxUploadSizeExceededException e) {
         log.warn("上传文件超过大小限制: {}", e.getMessage());
         return Result.fail(ErrorCodeEnum.FILE_TOO_LARGE);
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class,
+            HttpMessageNotReadableException.class})
+    public Result<?> handleParameter(Exception e) {
+        log.warn("请求参数绑定失败: {}", e.getMessage());
+        return Result.fail(ErrorCodeEnum.PARAMETER_INVALID);
     }
 
     // 系统异常兜底：真事故——error 级别记录完整堆栈，对顾客只说"内部错误"
