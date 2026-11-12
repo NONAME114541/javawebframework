@@ -26,11 +26,14 @@ public class RegistrationService {
     public User register(RegisterRequest request) {
         if (users.findByUsername(request.getUsername()).isPresent())
             throw new BusinessException(ErrorCodeEnum.USERNAME_TAKEN);
+        if (request.getPhone() != null && users.findByPhone(request.getPhone()).isPresent())
+            throw new BusinessException(ErrorCodeEnum.PHONE_TAKEN);
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(encoder.encode(request.getPassword()));
         user.setNickname(request.getNickname() == null || request.getNickname().isBlank()
                 ? request.getUsername() : request.getNickname());
+        user.setPhone(request.getPhone());
         user.setCreateTime(LocalDateTime.now());
         User saved = users.saveAndFlush(user);
         roles.assignRequired(saved.getId(), "USER");

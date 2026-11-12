@@ -1,0 +1,32 @@
+### 正常注册
+POST http://localhost:8081/register
+Content-Type: application/json
+
+{"username":"exp10-user-a","password":"secret123","phone":"13600136000"}
+
+### 用户名长度与手机号格式校验
+POST http://localhost:8081/register
+Content-Type: application/json
+
+{"username":"x","password":"secret123","phone":"12345"}
+
+### 用户名非空校验
+POST http://localhost:8081/register
+Content-Type: application/json
+
+{"password":"secret123","phone":"13900139000"}
+
+### 重复手机号 首次注册
+POST http://localhost:8081/register
+Content-Type: application/json
+
+{"username":"exp10-phone-a","password":"secret123","phone":"13700137000"}
+
+### 重复手机号 再次注册
+POST http://localhost:8081/register
+Content-Type: application/json
+
+{"username":"exp10-phone-b","password":"secret123","phone":"13700137000"}
+
+### 系统异常统一兜底
+GET http://localhost:8081/api/exp10/system-error

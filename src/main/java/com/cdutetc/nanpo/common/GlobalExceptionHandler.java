@@ -1,8 +1,12 @@
 package com.cdutetc.nanpo.common;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,6 +45,17 @@ public class GlobalExceptionHandler {
     public Result<?> handleMaxUploadSize(MaxUploadSizeExceededException e) {
         log.warn("上传文件超过大小限制: {}", e.getMessage());
         return Result.fail(ErrorCodeEnum.FILE_TOO_LARGE);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        e.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage()));
+        log.warn("参数校验失败: {}", fieldErrors);
+        Result<Map<String, String>> result = Result.fail(ErrorCodeEnum.PARAMETER_INVALID);
+        result.setData(fieldErrors);
+        return result;
     }
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class,

@@ -1,5 +1,7 @@
 package com.cdutetc.nanpo.controller;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +27,7 @@ public class UserController {
 
     // 办会员卡
     @PostMapping("/register")
-    public Result<Void> register(@RequestBody RegisterRequest req) {
+    public Result<Void> register(@Valid @RequestBody RegisterRequest req) {
         userService.register(req);
         return Result.success();
     }

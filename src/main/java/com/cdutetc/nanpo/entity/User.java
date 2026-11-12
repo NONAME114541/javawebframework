@@ -36,5 +36,8 @@ public class User {
 
     private String nickname;
 
+    @Column(unique = true)
+    private String phone;
+
     private LocalDateTime createTime;
 }
